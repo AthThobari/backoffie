@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model Account {
+  id                       String  @id
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String?
+  access_token             String?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?
+  session_state            String?
+  refresh_token_expires_in Int?
+
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+}
+
+model Transaction {
+  id              Int      @id @default(autoincrement())
+  idProduct       Int
+  dateTransaction DateTime @default(now())
+  typePayment     String
+  status          Status   @default(PENDING)
+  Product         Product  @relation(fields: [idProduct], references: [id])
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  name            String
+  email           String?   @unique
+  image           String?
+  password        String
+  no_tlpn         String       @unique
+  is_customer     Boolean?
+  role_user       RoleUser? @default(CUSTOMER)
+  profile_picture String?
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum RoleUser {
+  CUSTOMER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum Status {
+  SUCCESS
+  FAILED
+  PENDING
+}
+
+model Product {
+  id           Int           @id @default(autoincrement())
+  name         String
+  price        Float
+  image        String?
+  stock        Int
+  transactions Transaction[]
+}
+
+// dummy test
+
+model users {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  email     String   @db.VarChar(255)
+  address   String?  @db.VarChar(255)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @db.Timestamp(0)
+}
+
+
